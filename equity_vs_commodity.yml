@@ -1,6 +1,7 @@
 name: stock_vs_commodity
 channels:
   - conda-forge
+  - pytorch
 dependencies:
   - jupyter 
   - matplotlib >= 3.8
@@ -17,7 +18,11 @@ dependencies:
   - yfinance
   - pmdarima > 2.0
   - pandas-datareader
+  - pytorch
+  - torchvision
+  - torchtext
   - pip:
       - cinemagoer
       - lxml
       - pynytimes
+      - torchviz

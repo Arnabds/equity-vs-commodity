@@ -1,13 +1,13 @@
 1. Create environment using data_imputation.yml. 
-conda env create --name stock_vs_commodity --file=stock_vs_commodity.yml
+conda env create --name equity_vs_commodity --file=equity_vs_commodity.yml
 
 2. Activate the environment (Always do this step when you restart your computer/terminal)
-conda activate stock_vs_commodity
+conda activate equity_vs_commodity
 
 3. Install python package ipykernel from anaconda channel
 conda install -c anaconda ipykernel
 
 4. Register the version of Python in your virtual environment
-python -m ipykernel install --user --name=stock_vs_commodity
+python -m ipykernel install --user --name=equity_vs_commodity
 
-If everything works, you will see stock_vs_commodity in the list of available kernels when you open jupyter notebook
+If everything works, you will see equity_vs_commodity in the list of available kernels when you open jupyter notebook
