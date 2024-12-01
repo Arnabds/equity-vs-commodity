@@ -43,16 +43,16 @@ A foundational step in predicting the stock market of a company by leveraging st
 ---
 
 <h2 id="Data">Data</h2>
-> Our focus is on Ford (F), a major player in the U.S. automotive sector, as the testbed for this analysis. We consider 26 other companies that are directly or indirectly connected to Ford, including but not limited to companies in the same field and its supplier companies.
->
+Our focus is on Ford (F), a major player in the U.S. automotive sector, as the testbed for this analysis. We consider 26 other companies that are directly or indirectly connected to Ford, including but not limited to companies in the same field and its supplier companies.
+
 - **Automotive companies:** 'GM' (General Motors Co.), 'TM' (Toyota Motor Corp)
 - **Supplier companies:** 'ALV' (Autoliv Inc), 'DNZOY' (Denso ADR), 'ASEKY' (Aisin Corp), 'JCI' (Johnson Controls International PLC)
 - **Commodities:** 'CL=F' (Crude Oil), 'X' (US Steel Corporation), 'ALI=F' (Aluminum)
 - **Currencies exchange rates:** 'EURUSD=X' (EUR/ USD), 'CHFUSD=X' (CHF/ USD), 'GBPUSD=X' (GBP/ USD), 'JPYUSD=X' (JPY/ USD), 'CADUSD=X' (CAD/ USD), 'INRUSD=X' (INR/ USD), 'RUBUSD=X' (RUB/ USD). 'TRYUSD=X' (TRY/ USD)
 - **Financial companies and IRX:** '^IRX' (Inhalerx Ltd), 'JPM' (JPMorgan Chase & Co), 'BAC' (Bank of America Corp), 'C' (Citigroup Inc), 'WFC' (Wells Fargo & Co)
 - **Others:** '^IXIC' (Nasdaq Composite), '^GSPC' (S&P), '^DJI' (Dow Jones Industrial Average), 'FDX' (FedEx Corp)
->
-> We found that 21 of 26 companies have strong correlations to Ford. Applying the Granger-causality test, we reduced our relevant companies to 6: CADUSD=X, GM, JCI, TM, TRYUSD=X, ^IXIC.
+
+We found that 21 of 26 companies have strong correlations to Ford. Applying the Granger-causality test, we reduced our relevant companies to 6: CADUSD=X, GM, JCI, TM, TRYUSD=X, ^IXIC.
 
 <h2 id="Summary">Summary</h2>
 
