@@ -98,8 +98,8 @@ This is the correlation plot with all the final selected features.
 We have fitted 4 models from linear regression, linear regression with PCA, linear logistic regression, linear logistic regression with PCA all with regularization, XGBoost, XGBoost PCA.
 
 <p float="left">
-  <img src="/images/XGboost_reg.png" width="500" />
-  <img src="/images/XGBoost_reg_pca.png" width="500" /> 
+  <img src="/images/XGboost_reg.png" width="400" />
+  <img src="/images/XGBoost_reg_pca.png" width="400" /> 
 </p>
 
 This table summarizes the **average accuracy** achieved across five backtesting iterations using ridge, lasso, and elastic net regularization, with optimized hyperparameters. The models consistently demonstrated effective directional predictions and reliable performance, even in volatile stock market scenarios.
@@ -151,8 +151,8 @@ The trained network was applied to real-time market data for daily predictions d
 The model performed well, achieving an accuracy of 78.9%, correctly predicting 15 out of 19 cases.
 
 <p float="left">
-  <img src="/images/LSTM_close.png" width="500" />
-  <img src="/images/LSTM_class.png" width="500" /> 
+  <img src="/images/LSTM_close.png" width="400" />
+  <img src="/images/LSTM_class.png" width="400" /> 
 </p>
 
 ---
