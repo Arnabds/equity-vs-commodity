@@ -8,9 +8,6 @@ A foundational step in predicting the stock market of a company by leveraging st
 <ul>
     <li><a href="#Project-details">Project Details</a></li>
     <li><a href="#Pre-analysis">Pre-analysis</a>
-        <ul>
-            <li><a href="#Time-Series">Time Series</a></li>    
-        </ul>
     </li>
     <li><a href="#Data-Cleaning-and-Preparation">Data Cleaning and Preparation</a>
         <ul>
@@ -18,24 +15,14 @@ A foundational step in predicting the stock market of a company by leveraging st
             <li><a href="#Financial-Factors">Financial Factors</a></li>
         </ul>
     </li>
+    <li><a href="#EDA-and-Preprocessing">EDA and Preprocessing</a>
     <li><a href="#Models">Models</a>
         <ul>
             <li><a href="#Continuous-Models">Continuous Models</a></li>
             <li><a href="#Classification-Models">Classification Models</a></li>
         </ul>
     </li>
-    <li><a href="#Project-instructions">Project Instructions</a>
-        <ul>
-            <li><a href="#Steps">Steps</a>
-                <ul>
-                    <li><a href="#EDA-and-Preprocessing">EDA and Preprocessing</a></li>
-                    <li><a href="#Models1">Models1</a></li>
-                    <li><a href="#Prediction">Prediction</a></li>
-                    <li><a href="#Performance">Performance</a></li>
-                </ul>
-            </li>
-        </ul>
-    </li>
+    <li><a href="#Investopedia-Simulation">Investopedia Simulation</a></li>
     <li><a href="#Summary">Summary</a></li>
     <li><a href="#Things-to-answer-and-to-be-updated-next">Things to Answer and Update Next</a></li>
     <li><a href="#Code-description">Code Description</a></li>
@@ -44,9 +31,7 @@ A foundational step in predicting the stock market of a company by leveraging st
 ---
 <h3 id="Pre-analysis">Pre-analysis</h3>
 
-We began by studying the time series of Amazon stock prices and gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis.
-
-We fitted regression models to estimate trends and removed these trends to analyze residuals for stationarity. Residual analyses involved the Ljung-Box test and the ADF Fuller test, revealing non-stationarity. Differencing was applied to achieve stationarity, paving the way for ARIMA modeling. The best-fitting models were ARIMA(1,1,2) for gold and ARIMA(1,2,0) for Amazon. Although we did not explore GARCH models for volatility prediction at this stage, this is a next step. This preliminary analysis helped us understand the challenges of stock market prediction.
+We began by studying the time series of gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis. Our pre-analysis revealed that while ARIMA achieved theoretical stationarity, residual volatility persisted, even beyond GARCH's control. This underscores the need for additional predictive variables beyond historical prices to better understand market behavior."
 
 
 <h2 id="Data">Data</h2>
@@ -86,6 +71,15 @@ Given the daily granularity of Yahoo Finance data, the predictors derived from t
 - **Rate of Change** measures the most recent change in price with respect to the price 12 days ago.
 - **Price Volume Trend** determines a security's price direction and strength of price change.
 
+---
+
+<h2 id="EDA-and-Preprocessing">EDA and Preprocessing</h2>
+
+![Overall model with bollinger band](/images/Overall_model_with_bollinger_band.png)
+
+
+This is the correlation plot with all the final selected features.
+![Correlation plot](/images/corr.png)
 
 ---
 <h2 id="Models">Models</h2>
@@ -98,18 +92,53 @@ Given the daily granularity of Yahoo Finance data, the predictors derived from t
 
 <h3 id="Continuous-Models">Continuous Models</h3>
 
+---
+
 <h4>Regression and XGBoost Models</h4>
 We have fitted 4 models from linear regression, linear regression with PCA, linear logistic regression, linear logistic regression with PCA all with regularization, XGBoost, XGBoost PCA.
 
-![XGBoost regression](/images/XGboost_reg.png)
+<p float="left">
+  <img src="/images/XGboost_reg.png" width="400" />
+  <img src="/images/XGBoost_reg_pca.png" width="400" /> 
+</p>
 
-![XGBoost regression pca](/images/XGBoost_reg_pca.png)
+This table summarizes the **average accuracy** achieved across five backtesting iterations using ridge, lasso, and elastic net regularization, with optimized hyperparameters. The models consistently demonstrated effective directional predictions and reliable performance, even in volatile stock market scenarios.
 
-![Regression](/images/Reg.png)
 
-<h4>LSTM</h4>
 
-A neural network model can be effectively employed for this purpose, with Recurrent Neural Networks being particularly well-suited for time series modeling.
+| **Models**               | **Subparts**                                                   | **Accuracy**        | **Average Accuracy** |
+|--------------------------|----------------------------------------------------------------|---------------------|-----------------------|
+| Regression               | - Elastic Net(alpha=0.01, l1_ratio=0.2)                        | Accuracy: 100%      | **100%**            |
+|                          | - Backtesting 1(Ridge(alpha=0.1))                              | Accuracy: 42.9%     | **82.9%**                        |
+|                          | - Backtesting 2(Ridge(alpha=0.1))                              | Accuracy: 100%     |                       |
+|                          | - Backtesting 3(Ridge(alpha=0.1))                             | Accuracy: 71.4%     |                       |
+|                          | - Backtesting 4(Ridge(alpha=0.1))                             | Accuracy: 100%     |                       |
+|                          | - Backtesting 5(Elastic Net(alpha=0.01, l1_ratio=0.2))        | Accuracy: 100%     |                       |
+| Regression PCA           | - Elastic Net(alpha=0.01, l1_ratio=0.2)                        | Accuracy: 100%      | **100%**            |
+|                          | - Backtesting 1(Ridge(alpha=0.1))                              | Accuracy: 71.4%     | **82.8%**                      |
+|                          | - Backtesting 2(Ridge(alpha=0.1))                              | Accuracy: 85.7%     |                       |
+|                          | - Backtesting 3(Ridge(alpha=0.1))                             | Accuracy: 71.4%     |                       |
+|                          | - Backtesting 4(Ridge(alpha=0.1))                             | Accuracy: 100%     |                       |
+|                          | - Backtesting 5(Elastic Net(alpha=0.01, l1_ratio=0.2))        | Accuracy: 85.7%     |                       |
+| XGBoost                  | - Elastic Net(alpha=0.01, l1_ratio=0.2)                        | Accuracy: 100%      | **100%**            |
+|                          | - Backtesting 1(Ridge(alpha=0.1))                              | Accuracy: 42.9%     | **82.9%**                      |
+|                          | - Backtesting 2(Ridge(alpha=0.1))                              | Accuracy: 100%     |                       |
+|                          | - Backtesting 3(Ridge(alpha=0.1))                             | Accuracy: 85.7%     |                       |
+|                          | - Backtesting 4(Ridge(alpha=0.1))                             | Accuracy: 85.7%     |                       |
+|                          | - Backtesting 5(Elastic Net(alpha=0.01, l1_ratio=0.2))        | Accuracy: 100%     |                       |
+| XGBoost PCA              | - Elastic Net(alpha=0.01, l1_ratio=0.2)                        | Accuracy: 100%      | **100%**            |
+|                          | - Backtesting 1(Ridge(alpha=0.1))                              | Accuracy: 86.9%     | **86.6%**                      |
+|                          | - Backtesting 2(Ridge(alpha=0.1))                              | Accuracy: 89.8%     |                       |
+|                          | - Backtesting 3(Ridge(alpha=0.1))                             | Accuracy: 85.5%     |                       |
+|                          | - Backtesting 4(Ridge(alpha=0.1))                             | Accuracy: 85.5%     |                       |
+|                          | - Backtesting 5(Elastic Net(alpha=0.01, l1_ratio=0.2))        | Accuracy: 85.5%     |                       |
+| Logistic Regression      | - Elastic Net(alpha=0.01, l1_ratio=0.2)                        | Accuracy: 66.7%      | **66.7%**            |
+| Logistic Regression PCA  | - Elastic Net(alpha=0.01, l1_ratio=0.2)                        | Accuracy: 100%      | **100%**            |
+---
+
+<h4>Long short-term memory (LSTM)</h4>
+
+Recurrent Neural Networks (RNNs) is well-suited for time series modeling.
 Among RNNs, Long Short-Term Memory modules are especially advantageous for capturing temporal dependencies.
 Unlike many other classical models, this approach eliminates the need for preselecting input features, simplifying the process.
 During the training phase, historical data from highly correlated tickers organized based on Granger causality, and their various indicator functions, is used as input.
@@ -118,33 +147,38 @@ Finally, the model produces a continuous output value representing the predicted
 
 ![LSTM](/images/LSTM.JPG)
 
+The trained network was applied to real-time market data for daily predictions during the last November.
+The model performed well, achieving an accuracy of 78.9%, correctly predicting 15 out of 19 cases.
+
+<p float="left">
+  <img src="/images/LSTM_close.png" width="400" />
+  <img src="/images/LSTM_class.png" width="400" /> 
+</p>
+
+---
+
+<h4>Support Vector Regressor</h4>
+
+
+
 <h3 id="Classification-Models">Classification Models</h3>
 
+---
+
+<h4>KNN</h4>
 
 
 
-<h2 id="Steps">Steps</h2>
-We have divided our project into 6 parts: ***EDA and Preprocessing, Cluster Analysis, Models, Performance, Prediction, and Testing***. We divided our work in groups. You will get these files with codes in jupyter notebook and HTML folders in Github. Introduction has been given so far. Let us start with the EDA.
+---
 
-|EDA and Preprocessing|Cluster Analysis|Models|Performance|Prediction|Bonus|
-|--------|--------|--------|--------|--------|--------|
-|Plotting necessary data, Standardization, Removing skewness, PCA|KMeans, Hierarchical clustering|7 logistic regression models and accuracy on training data|testing on manually created data|Gridsearch, lasso, ridge, elastic net|SVC, Neural net|
-|Python|Python|Python|Python|Python|Python|
+<h2 id="#Investopedia-Simulation"">Investopedia Simulations</h2>
 
+We created 2 games on Investopedia Simulator, where we tested our continuous and classification models. Each received $100k and traded between November 4 and November 29. SVC is the best classification model while regression model performs better than other continuous models.
 
-
-<h2 id="EDA-and-Preprocessing">EDA and Preprocessing</h2>
-
-![Overall model with bollinger band](/images/Overall_model_with_bollinger_band.png)
-
-
-This is the correlation plot with all the final selected features.
-![Correlation plot](/images/corr.png)
-
-
-<h2 id="Models">Models</h2>
-We have fitted 4 models from linear regression, linear regression with PCA, linear logistic regression, linear logistic regression with PCA all with regularization, XGBoost, XGBoost PCA.
-
+<p float="center">
+  <img src="/images/Investopedia_continuous.JPG" width="1000" />
+  <img src="/images/Investopedia_class.JPG" width="1000" /> 
+</p>
 
 <h2 id="Summary">Summary</h2>
 
@@ -153,6 +187,7 @@ We have fitted 4 models from linear regression, linear regression with PCA, line
     - Continuous models could predict continuous values, but it is sensitive to the market noise.
     - Classification models can predict trends more accurately, but it is less informative since it does not tell us about the exact price values.
 
+---
 
 <h2 id="Things-to-answer-and-to-be-updated-next">Things to answer and to be updated next</h2>
 
