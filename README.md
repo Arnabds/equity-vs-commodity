@@ -9,7 +9,7 @@ A foundational step in predicting the stock market of a company by leveraging st
     <li><a href="#Project-details">Project Details</a></li>
     <li><a href="#Pre-analysis">Pre-analysis</a>
     </li>
-    <li><a href="#Data-Cleaning-and-Preparation">Data Cleaning and Preparation</a>
+    <li><a href="#Data">Data</a>
         <ul>
             <li><a href="#Data-Cleaning-and-Preparation">Data Cleaning and Preparation</a></li>
             <li><a href="#Financial-Factors">Financial Factors</a></li>
@@ -23,6 +23,7 @@ A foundational step in predicting the stock market of a company by leveraging st
         </ul>
     </li>
     <li><a href="#Investopedia-Simulation">Investopedia Simulation</a></li>
+    <li><a href="#Model-Performance-Comparison">Model Performance Comparison</a></li>
     <li><a href="#Summary">Summary</a></li>
     <li><a href="#Things-to-answer-and-to-be-updated-next">Things to Answer and Update Next</a></li>
     <li><a href="#Code-description">Code Description</a></li>
@@ -31,8 +32,7 @@ A foundational step in predicting the stock market of a company by leveraging st
 ---
 <h3 id="Pre-analysis">Pre-analysis</h3>
 
-We began by studying the time series of gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis. Our pre-analysis revealed that while ARIMA achieved theoretical stationarity, residual volatility persisted, even beyond GARCH's control. This underscores the need for additional predictive variables beyond historical prices to better understand market behavior."
-
+We began by studying the time series of gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis. Our pre-analysis revealed that while ARIMA achieved theoretical stationarity, residual volatility persisted, even beyond GARCH's control. This underscores the need for additional predictive variables beyond historical prices to better understand market behavior.
 
 <h2 id="Data">Data</h2>
 
@@ -45,7 +45,11 @@ Our focus is on Ford (`'F'`), a major player in the U.S. automotive sector, as t
 - **Financial companies and IRX:** `'^IRX'` (Inhalerx Ltd), `'JPM'` (JPMorgan Chase & Co), `'BAC'` (Bank of America Corp),`'C'` (Citigroup Inc), `'WFC'` (Wells Fargo & Co)
 - **Others:** `'^IXIC'` (Nasdaq Composite), `'^GSPC'` (S&P), `'^DJI'` (Dow Jones Industrial Average), `'FDX'` (FedEx Corp)
 
+--- 
+
 <h3 id="Data-Cleaning-and-Preparation">Data Cleaning and Preparation</h3>
+
+Granger Causality is a statistical hypothesis test used to determine whether one time series can predict another. In other words, if the past values of one time series `X` provide significant information about the future values of another variable `Y` (beyond what is contained in the past values of `Y` alone), the `X` is said to Granger-cause `Y`. Granger Causality is closely related to cross-correlation, it is more sophicated since it provides a test for predictive causality, an information that can be useful for statistical modeling.
 
 We found that 21 of 26 companies have strong correlations to Ford. Applying the Granger-causality test, we reduced our relevant companies to 6. The final set of features included: `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`, and `'F'`. 
 
@@ -53,6 +57,8 @@ We found that 21 of 26 companies have strong correlations to Ford. Applying the 
 
 We assessed model performance for continuous and categorical prediction using continuous model such as LSTM, and Classification model like Logistic Regression. We employed forward cross-validation and backtesting to evaluate model robustness.
 <img src=/images/preprocessing.jpg width="800" class="center" />
+
+--- 
 
 <h3 id="Financial-Factors">Financial Factors</h3>
 
@@ -103,8 +109,6 @@ We have fitted 4 models from linear regression, linear regression with PCA, line
 </p>
 
 This table summarizes the **average accuracy** achieved across five backtesting iterations using ridge, lasso, and elastic net regularization, with optimized hyperparameters. The models consistently demonstrated effective directional predictions and reliable performance, even in volatile stock market scenarios.
-
-
 
 | **Models**               | **Subparts**                                                   | **Accuracy**        | **Average Accuracy** |
 |--------------------------|----------------------------------------------------------------|---------------------|-----------------------|
@@ -157,8 +161,36 @@ The model performed well, achieving an accuracy of 78.9%, correctly predicting 1
 
 ---
 
-<h4>Support Vector Regressor</h4>
+<h4>Support Vector Regression</h4>
 
+We used Supprt Vector Regression to predict Ford's stock movement. We selected models from time series cross validation and grid search. We found the best hyperparameters are {C: 1, epsilon: 0.01, kernel: 'linear'} and yield MSE of 0.0081. The confidence interval showed high uncertainty in forecasting future prices. It struggled to predict the exact magnitude of the changes, such as the steepness of the slope or the precise amount of up or down movement.
+
+![SVM_regressor](/images/SVM_regression.JPG)
+
+---
+
+<h4>Vector Auto-Regression (VAR)</h4>
+
+If X Granger-causes Y, then we can use X to predict Y. From the Granger Causality test, we found that `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`  Granger-cause `'F'`, therefore including information of these companies will improve prediction. We implemented the Vector AutoRegressive on training set to determine `lag order` for each company. The `lag order` refers to number of past days that are included in the model.
+
+The table was obtained across 10-fold cross-validation, where `n` is forecast length. `n = 5` is the prediction for one week of trading. `CADUSD=X` had small `lag order` while `JCI` required more past observations compared to the rests. 
+
+| Ticker              | n = 1  | n = 2 | n = 3 | n = 4 | n = 5 |
+|---------------------|--------|-------|-------|-------|-------|
+| CAD/USD             | 2      | 12    | 5     | 5     | 5     |
+| GM                  | 35     | 36    | 30    | 6     | 6     |
+| JCI                 | 30     | 29    | 35    | 35    | 33    |
+| TM                  | 8      | 26    | 27    | 21    | 5     |
+| TRY/ USD            | 11     | 39    | 3     | 3     | 17    |
+| IXIC                | 26     | 24    | 3     | 19    | 35    |
+
+For short forecast length, Nasdaq (`IXIC`) performs the best, but as the forecast length increases, Johnson Control (`JCI`) surpasses Nasdaq in performance. 
+While performance is sparse for short forecast length, the accuracy using Nasdaq could exceed accuracy of 0.90. 
+
+![VAR_backtest](/images/VAR_backtest.jpg)
+---
+
+---
 
 
 <h3 id="Classification-Models">Classification Models</h3>
@@ -167,18 +199,74 @@ The model performed well, achieving an accuracy of 78.9%, correctly predicting 1
 
 <h4>KNN</h4>
 
+We apply KNN with different metrics (e.g., Euclidean, Manhattan) using time-series split. We train on smaller data (last 2 month) and include Dynamic Time Warping (DTW), which is better for time-series but computationally intensive. Accuracies indicate KNN often performs close to random guessing, showing poor alignment with time-series patterns. KNN is generally unsuitable for time-series data, though DTW may improve back-testing results (but required much larger computational time)
 
+<p float="left">
+  <img src="/images/KNN_1.png" width="400" />
+  <img src="/images/KNN_2.png" width="400" /> 
+</p>
 
 ---
 
-<h2 id="#Investopedia-Simulation"">Investopedia Simulations</h2>
+<h4>Support Vector Classification</h4>
 
-We created 2 games on Investopedia Simulator, where we tested our continuous and classification models. Each received $100k and traded between November 4 and November 29. SVC is the best classification model while regression model performs better than other continuous models.
+Similar to Support Vector Regression, data was standardized, features were transformed using `StandardScaler`, and skewness was removed using power transformed. The best hyperparameters are {C: 1, gamma: 0.01, kernel: 'linear'}. SVC has accuracy of 0.857.
+
+![SVM_class](/images/SVM_class.JPG)
+
+---
+
+<h4>Random Forest</h4>
+
+For the base model, I trained my data on Ford’s indicators alone, while for other models, I used both Ford’s and indicators from one company from the list of 6. I applied GridSearch for number of estimators, maximum depth, bootstrap, and criterion. Overall, `Base model` performs well with training accuracy of 0.64. The best model used both `F`'s and `JCI`'s indicators, and only performed slightly better than the `Base model`. 
+
+| Ticker              | Number of estimators   | Maximum Depth | Bootstrap    | Criterion | Training Accuracy |
+|---------------------|------------------------|---------------|-----------   |-----------|-------------------|
+| CAD/USD             | 20                     | 5             | True         | gini      | 0.62              |
+| GM                  | 100                    | 5             | True         | entropy   | 0.64              |
+| JCI                 | 80                     | 5             | True         | gini      | 0.66              |
+| TM                  | 80                     | 5             | True         | gini      | 0.56              |
+| TRY/ USD            | 20                     | 5             | True         | gini      | 0.56              |
+| IXIC                | 500                    | 20            | True         | gini      | 0.64              |
+| Base                | 100                    | 5             | True         | entropy   | 0.64              |
+
+All training models were applied to the backtesting sets and walk forward validation sets. `IXIC` model outperformed other models. On the other hand, `Base model` worked well on backtesting sets, but it performed worse than random guessing.
+
+<p float="left">
+  <img src="/images/ROC_backtesting.jpg" width="400" />
+  <img src="/images/ROC_forward.jpg" width="400" /> 
+</p>
+
+<h2 id="#Investopedia-Simulation">Investopedia Simulations</h2>
+
+To further evaluate our models, we created two trading games on the Investopedia Simulator. Each participant started with $100,000 and traded between November 4 and November 29, guided by the predictions of either continuous or classification models. Among the classification models, SVC delivered the best performance, while the regression model outperformed other continuous models in terms of predictive accuracy and trading outcomes.
 
 <p float="center">
   <img src="/images/Investopedia_continuous.JPG" width="1000" />
   <img src="/images/Investopedia_class.JPG" width="1000" /> 
 </p>
+
+<h2 id="Model-Performance-Comparison">Model Performance Comparison</h2>
+
+Despite the inherent market volatility, our models demonstrated reliable classification accuracy, providing valuable directional insights into stock price movements. 
+
+To further validate their effectiveness, we tested the models using trading data from the specified time range. Among the approaches, XGBoost with PCA emerged as the top performer, followed by SVC and regression models.
+
+
+| **Models**               | **Accuracy**           |      
+|--------------------------|------------------------|
+| XGBoost PCA              | 0.866                  |
+| SVC                      | 0.857                  | 
+| SVR                      | 0.84                   |
+| XGBoost                  | 0.829                  | 
+| Regression               | 0.829                  |
+| Regression PCA           | 0.829                  |
+| Random Forest            | 0.80                   |
+| VAR                      | 0.789                  |
+| LSTM                     | 0.789                  |
+| KNN                      | 0.789                  |                     
+---
+
 
 <h2 id="Summary">Summary</h2>
 
@@ -196,3 +284,6 @@ Our journey doesn’t stop here. We aim to make more accurate and actionable pre
 <h2 id="Code-description">Code Description</h2>
 
 Notebooks containing various models used for results above can be found in this [folder](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models).
+- [KNN.ipynb](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/KNN.ipynb):
+- [SVM_reg](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM_reg.ipynb):
+- [SVM_class](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM%20_class.ipynb):
