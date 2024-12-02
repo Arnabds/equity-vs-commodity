@@ -6,7 +6,7 @@ A foundational step in predicting the stock market of a company by leveraging st
 <h2 id="Table-of-Contents">Table of Contents</h2>
 
 <ul>
-    <li><a href="#Project-details">Project Details</a></li>
+    <li><a href="#Motivation">Motivation</a></li>
     <li><a href="#Pre-analysis">Pre-analysis</a>
     </li>
     <li><a href="#Data">Data</a>
@@ -30,6 +30,12 @@ A foundational step in predicting the stock market of a company by leveraging st
 </ul>
 
 ---
+
+<h3 id="Motivation">Motivation</h3>
+
+The stock market is complex - volatile, multifactorial, and often lacking actionable data. Our mission was to address this challenge through rigorous analysis, innovative feature engineering, and robust forecasting techniques. Our study is centered on technical indicators rather than developing an algorithmic trading strategy. Our objective is to evaluate whether machine learning models can predict future stock price movements. While our approach does not directly aim to maximize trading profits, it offers valuable insights that traders and analysts can incorporate into broader strategic decisions.
+
+
 <h3 id="Pre-analysis">Pre-analysis</h3>
 
 We began by studying the time series of gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis. Our pre-analysis revealed that while ARIMA achieved theoretical stationarity, residual volatility persisted, even beyond GARCH's control. This underscores the need for additional predictive variables beyond historical prices to better understand market behavior.
@@ -53,13 +59,15 @@ Granger Causality is a statistical hypothesis test used to determine whether one
 
 We found that 21 of 26 companies have strong correlations to Ford. Applying the Granger-causality test, we reduced our relevant companies to 6. The final set of features included: `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`, and `'F'`. 
 
+We obtained raw data from `yfinance` and cleaned data between **November 26, 2019** and **October 28, 2024**:
 
-['Regression data'](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Data/dataset_others.csv): data for regression models.
-['Classification data'](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Data/dataset_others_class.csv): indicators data for classification model. 
+[dataset_others](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Data/dataset_others.csv): data for regression models.
+
+[dataset_others_class](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Data/dataset_others_class.csv): indicators data for classification model. 
 
 <img src=/images/data.png width="800" class="center" />
 
-We assessed model performance for continuous and categorical prediction using continuous model such as LSTM, and Classification model like Logistic Regression. We employed forward cross-validation and backtesting to evaluate model robustness. Validation set was `F`'s trading data between November 4, 2024 and November 29, 2024. The dataset Backtesting set was not used in the training process, but it is reserved for the final strategy backtest.
+We assessed model performance for continuous and categorical prediction using continuous model such as LSTM, and Classification model like Logistic Regression. We employed forward cross-validation and backtesting to evaluate model robustness. The validation set was `F`'s trading data between **November 4, 2024** and **November 29, 2024**. We splitted the data set into training set and backtesting set. Backtesting set was not used in the training process, but it was reserved for the final strategy backtest.
 
 <img src=/images/preprocessing.jpg width="800" class="center" />
 
@@ -78,7 +86,7 @@ Given the daily granularity of Yahoo Finance data, the predictors derived from t
 - **Relative Strength Index (RSI)** determines whether the stock is overbought or oversold.
 - **Moving Averages** identifies trend direction of a stock.
 - **Simple Moving Average** calculates rolling average of close prices over a period of 20 days. 
-- **Exponential Moving Average** calculates exponential average of close prices over a period 20 days and weighted average that gives greater importance to the price in more recent days. 
+- **Exponential Moving Average** calculates exponential average of close prices over a period 20 days and weights average that gives greater importance to the price in more recent days. 
 - **Rate of Change** measures the most recent change in price with respect to the price 12 days ago.
 - **Price Volume Trend** determines a security's price direction and strength of price change.
 
@@ -176,7 +184,7 @@ We used Supprt Vector Regression to predict Ford's stock movement. We selected m
 
 <h4>Vector Auto-Regression (VAR)</h4>
 
-If X Granger-causes Y, then we can use X to predict Y. From the Granger Causality test, we found that `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`  Granger-cause `'F'`, therefore including information of these companies will improve prediction. We implemented the Vector AutoRegressive on training set to determine `lag order` for each company. The `lag order` refers to number of past days that are included in the model.
+If X Granger-causes Y, then we can use X to predict Y. From the Granger Causality test, we found that `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`  Granger-cause `'F'`, therefore including information of these companies will improve prediction. We implemented the Vector AutoRegressive on training set to determine `lag order` for each company. The `lag order` refers to the number of past days that are included in the model.
 
 The table was obtained across 10-fold cross-validation, where `n` is forecast length. `n = 5` is the prediction for one week of trading. `CADUSD=X` had small `lag order` while `JCI` required more past observations compared to the rests. 
 
@@ -223,7 +231,7 @@ Similar to Support Vector Regression, data was standardized, features were trans
 
 <h4>Random Forest</h4>
 
-For the base model, I trained my data on Ford’s indicators alone, while for other models, I used both Ford’s and indicators from one company from the list of 6. I applied GridSearch for number of estimators, maximum depth, bootstrap, and criterion. Overall, `Base model` performs well with training accuracy of 0.64. The best model used both `F`'s and `JCI`'s indicators, and only performed slightly better than the `Base model`. 
+For the `Base model`, I trained my data on `F`'s indicators alone, while for other models, I used both Ford’s and indicators from one company from the list of 6. I applied GridSearch for number of estimators, maximum depth, bootstrap, and criterion. Overall, `Base model` performs well with training accuracy of 0.64. The best model used both `F`'s and `JCI`'s indicators, and only performed slightly better than the `Base model`. 
 
 | Ticker              | Number of estimators   | Maximum Depth | Bootstrap    | Criterion | Training Accuracy |
 |---------------------|------------------------|---------------|-----------   |-----------|-------------------|
