@@ -53,9 +53,14 @@ Granger Causality is a statistical hypothesis test used to determine whether one
 
 We found that 21 of 26 companies have strong correlations to Ford. Applying the Granger-causality test, we reduced our relevant companies to 6. The final set of features included: `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`, and `'F'`. 
 
+
+['Regression data'](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Data/dataset_others.csv): data for regression models.
+['Classification data'](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Data/dataset_others_class.csv): indicators data for classification model. 
+
 <img src=/images/data.png width="800" class="center" />
 
-We assessed model performance for continuous and categorical prediction using continuous model such as LSTM, and Classification model like Logistic Regression. We employed forward cross-validation and backtesting to evaluate model robustness.
+We assessed model performance for continuous and categorical prediction using continuous model such as LSTM, and Classification model like Logistic Regression. We employed forward cross-validation and backtesting to evaluate model robustness. Validation set was `F`'s trading data between November 4, 2024 and November 29, 2024. The dataset Backtesting set was not used in the training process, but it is reserved for the final strategy backtest.
+
 <img src=/images/preprocessing.jpg width="800" class="center" />
 
 --- 
@@ -237,7 +242,7 @@ All training models were applied to the backtesting sets and walk forward valida
   <img src="/images/ROC_forward.jpg" width="400" /> 
 </p>
 
-<h2 id="#Investopedia-Simulation">Investopedia Simulations</h2>
+<h2 id="#Investopedia-Simulation">Investopedia Simulation</h2>
 
 To further evaluate our models, we created two trading games on the Investopedia Simulator. Each participant started with $100,000 and traded between November 4 and November 29, guided by the predictions of either continuous or classification models. Among the classification models, SVC delivered the best performance, while the regression model outperformed other continuous models in terms of predictive accuracy and trading outcomes.
 
@@ -283,7 +288,8 @@ Our journey doesn’t stop here. We aim to make more accurate and actionable pre
 
 <h2 id="Code-description">Code Description</h2>
 
-Notebooks containing various models used for results above can be found in this [folder](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models).
+Data uset can be found in this [Data](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Data) folder.
+Notebooks containing various models used for results above can be found in this [Model](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models) folder.
 - [KNN.ipynb](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/KNN.ipynb):
 - [SVM_reg](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM_reg.ipynb):
 - [SVM_class](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM%20_class.ipynb):
