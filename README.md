@@ -59,6 +59,8 @@ Our focus is on Ford (`'F'`), a major player in the U.S. automotive sector, as t
 - **Financial companies and IRX:** `'^IRX'` (Inhalerx Ltd), `'JPM'` (JPMorgan Chase & Co), `'BAC'` (Bank of America Corp),`'C'` (Citigroup Inc), `'WFC'` (Wells Fargo & Co)
 - **Others:** `'^IXIC'` (Nasdaq Composite), `'^GSPC'` (S&P), `'^DJI'` (Dow Jones Industrial Average), `'FDX'` (FedEx Corp)
 
+<img src=/images/Ford_connections.png width="600" class="center" />
+
 --- 
 
 <h3 id="Data-Cleaning-and-Preparation">Data Cleaning and Preparation</h3>
