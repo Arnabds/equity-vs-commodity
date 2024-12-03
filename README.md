@@ -35,11 +35,19 @@ A foundational step in predicting the stock market of a company by leveraging st
 
 The stock market is complex - volatile, multifactorial, and often lacking actionable data. Our mission was to address this challenge through rigorous analysis, innovative feature engineering, and robust forecasting techniques. Our study is centered on technical indicators rather than developing an algorithmic trading strategy. Our objective is to evaluate whether machine learning models can predict future stock price movements. While our approach does not directly aim to maximize trading profits, it offers valuable insights that traders and analysts can incorporate into broader strategic decisions.
 
+---
 
 <h3 id="Pre-analysis">Pre-analysis</h3>
 
-We began by studying the time series of gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis. Our pre-analysis revealed that while ARIMA achieved theoretical stationarity, residual volatility persisted, even beyond GARCH's control. This underscores the need for additional predictive variables beyond historical prices to better understand market behavior.
+We began by studying the time series of gold commodity prices. Using data imported from Yahoo Finance, we performed time series analyses. The available data included `Volume`, `High`, `Low`, `Open`, and `Close` prices, but we focused solely on `Close` prices for analysis. 
 
+<img src=/images/ARIMAresidual.png width="800" class="center" />
+
+Our pre-analysis revealed that while ARIMA achieved theoretical stationarity, residual volatility persisted, even beyond GARCH's control. This underscores the need for additional predictive variables beyond historical prices to better understand market behavior.
+
+<img src=/images/GARCH(1,1).png width="800" class="center" />
+
+---
 <h2 id="Data">Data</h2>
 
 Our focus is on Ford (`'F'`), a major player in the U.S. automotive sector, as the testbed for this analysis. We consider 26 other companies that are directly or indirectly connected to Ford, including but not limited to companies in the same field and its supplier companies.
@@ -117,6 +125,8 @@ This is the correlation plot with all the final selected features.
 We have fitted 4 models from linear regression, linear regression with PCA, linear logistic regression, linear logistic regression with PCA all with regularization, XGBoost, XGBoost PCA.
 
 <p float="left">
+  <img src="/images/Reg.png" width="400" /> 
+  <img src="/images/Reg_pca.png" width="400" /> 
   <img src="/images/XGboost_reg.png" width="400" />
   <img src="/images/XGBoost_reg_pca.png" width="400" /> 
 </p>
@@ -186,7 +196,7 @@ We used Supprt Vector Regression to predict Ford's stock movement. We selected m
 
 If X Granger-causes Y, then we can use X to predict Y. From the Granger Causality test, we found that `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`  Granger-cause `'F'`, therefore including information of these companies will improve prediction. We implemented the Vector AutoRegressive on training set to determine `lag order` for each company. The `lag order` refers to the number of past days that are included in the model.
 
-The table was obtained across 10-fold cross-validation, where `n` is forecast length. `n = 5` is the prediction for one week of trading. `CADUSD=X` had small `lag order` while `JCI` required more past observations compared to the rests. 
+The table was obtained across 5-fold cross-validation, where `n` is forecast length. `n = 5` is the prediction for one week of trading. `CADUSD=X` had small `lag order` while `JCI` required more past observations compared to the rests. 
 
 | Ticker              | n = 1  | n = 2 | n = 3 | n = 4 | n = 5 |
 |---------------------|--------|-------|-------|-------|-------|
@@ -200,7 +210,14 @@ The table was obtained across 10-fold cross-validation, where `n` is forecast le
 For short forecast length, Nasdaq (`IXIC`) performs the best, but as the forecast length increases, Johnson Control (`JCI`) surpasses Nasdaq in performance. 
 While performance is sparse for short forecast length, the accuracy using Nasdaq could exceed accuracy of 0.90. 
 
-![VAR_backtest](/images/VAR_backtest.jpg)
+<p float="center">
+  <img src="/images/VAR_backtest.jpg" width="800" />
+</p>
+
+<p float="center">
+  <img src="/images/VAR_close_price.png" width="800" /> 
+</p>
+
 ---
 
 ---
@@ -250,6 +267,8 @@ All training models were applied to the backtesting sets and walk forward valida
   <img src="/images/ROC_forward.jpg" width="400" /> 
 </p>
 
+---
+
 <h2 id="#Investopedia-Simulation">Investopedia Simulation</h2>
 
 To further evaluate our models, we created two trading games on the Investopedia Simulator. Each participant started with $100,000 and traded between November 4 and November 29, guided by the predictions of either continuous or classification models. Among the classification models, SVC delivered the best performance, while the regression model outperformed other continuous models in terms of predictive accuracy and trading outcomes.
@@ -259,7 +278,15 @@ To further evaluate our models, we created two trading games on the Investopedia
   <img src="/images/Investopedia_class.JPG" width="1000" /> 
 </p>
 
+---
+
 <h2 id="Model-Performance-Comparison">Model Performance Comparison</h2>
+
+Our dataset was splitted up into training set and backtesting set. After training machine learning models on the training set, we validated our models on backtesting set. Regression and XGBoost models (with and without PCA) perform best.
+
+<p float="center">
+  <img src="/images/Backtesting_accuracy.jpg" width="1000" />
+</p>
 
 Despite the inherent market volatility, our models demonstrated reliable classification accuracy, providing valuable directional insights into stock price movements. 
 
@@ -297,7 +324,9 @@ Our journey doesn’t stop here. We aim to make more accurate and actionable pre
 <h2 id="Code-description">Code Description</h2>
 
 Data uset can be found in this [Data](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Data) folder.
-Notebooks containing various models used for results above can be found in this [Model](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models) folder.
-- [KNN.ipynb](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/KNN.ipynb):
-- [SVM_reg](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM_reg.ipynb):
-- [SVM_class](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM%20_class.ipynb):
+Notebooks containing various models used for results above can be found in this [Model](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models) folder. The models include:
+- [KNN.ipynb](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/KNN.ipynb)
+- [SVM_reg](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM_reg.ipynb)
+- [SVM_class](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM%20_class.ipynb)
+- [VAR](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/VAR.ipynb)
+- [RF](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/RF.ipynb)
