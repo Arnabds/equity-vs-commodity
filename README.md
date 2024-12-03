@@ -59,12 +59,21 @@ Our focus is on Ford (`'F'`), a major player in the U.S. automotive sector, as t
 - **Financial companies and IRX:** `'^IRX'` (Inhalerx Ltd), `'JPM'` (JPMorgan Chase & Co), `'BAC'` (Bank of America Corp),`'C'` (Citigroup Inc), `'WFC'` (Wells Fargo & Co)
 - **Others:** `'^IXIC'` (Nasdaq Composite), `'^GSPC'` (S&P), `'^DJI'` (Dow Jones Industrial Average), `'FDX'` (FedEx Corp)
 
+We also included currency exchange rates in the dataset.
+
+To refine our feature selection, we:
+
+    1. Drew a correlation matrix of closing prices.
+    2. Selected stocks with an absolute correlation > 0.4.
+    3. Applied Granger Causality to further narrow the list.
+
 <p float="center">
   <img src="/images/Ford_connections.png" width="600" /> 
 </p>
 --- 
 
 <h3 id="Data-Cleaning-and-Preparation">Data Cleaning and Preparation</h3>
+
 
 Granger Causality is a statistical hypothesis test used to determine whether one time series can predict another. In other words, if the past values of one time series `X` provide significant information about the future values of another variable `Y` (beyond what is contained in the past values of `Y` alone), the `X` is said to Granger-cause `Y`. Granger Causality is closely related to cross-correlation, it is more sophicated since it provides a test for predictive causality, an information that can be useful for statistical modeling.
 
@@ -199,32 +208,31 @@ We used Supprt Vector Regression to predict Ford's stock movement. We selected m
 
 If X Granger-causes Y, then we can use X to predict Y. From the Granger Causality test, we found that `'CADUSD=X'`, `'GM'`, `'JCI'`, `'TM'`, `'TRYUSD=X'`, `'^IXIC'`  Granger-cause `'F'`, therefore including information of these companies will improve prediction. We implemented the Vector AutoRegressive on training set to determine `lag order` for each company. The `lag order` refers to the number of past days that are included in the model.
 
-The table was obtained across 5-fold cross-validation, where `n` is forecast length. `n = 5` is the prediction for one week of trading. `CADUSD=X` had small `lag order` while `JCI` required more past observations compared to the rests. 
+The table was obtained across 5-fold cross-validation, where `n` is forecast length, so `n = 5` is the prediction for one week of trading. The `optimal lag` ranges from 6 days to 39 days. VAR models of
+`CADUSD=X` had small `lag order` while `JCI` required more past observations compared to the rests. 
 
 | Ticker              | n = 1  | n = 2 | n = 3 | n = 4 | n = 5 |
 |---------------------|--------|-------|-------|-------|-------|
-| CAD/USD             | 2      | 12    | 5     | 5     | 5     |
-| GM                  | 35     | 36    | 30    | 6     | 6     |
-| JCI                 | 30     | 29    | 35    | 35    | 33    |
-| TM                  | 8      | 26    | 27    | 21    | 5     |
-| TRY/ USD            | 11     | 39    | 3     | 3     | 17    |
-| IXIC                | 26     | 24    | 3     | 19    | 35    |
+| CAD/USD             | 21     | 7     | 6     | 8     | 7     |
+| GM                  | 14     | 12    | 29    | 29    | 16    |
+| JCI                 | 33     | 30    | 33    | 22    | 22    |
+| TM                  | 27     | 30    | 26    | 27    | 27    |
+| TRY/ USD            | 22     | 22    | 18    | 39    | 39    |
+| IXIC                | 27     | 26    | 26    | 26    | 26    |
 
-For short forecast length, Nasdaq (`IXIC`) performs the best, but as the forecast length increases, Johnson Control (`JCI`) surpasses Nasdaq in performance. 
-While performance is sparse for short forecast length, the accuracy using Nasdaq could exceed accuracy of 0.90. 
+We applied our models to 10 backtesting sets. Toyota Motors (`TM`) achieved accuracy of 70% for shorter forecast length (`n = 1' and `n = 2`), while General Motors (`GM`) performed better on longer forecast length (`n = 3` and `n = 4`). If we wanted to predict one week of trading (5 trading days), Nasdaq (`IXIC`) could get up to 62% accuracy.  
 
 <p float="center">
   <img src="/images/VAR_backtest.jpg" width="800" />
 </p>
+
+We also used VAR models to predict `F`'s close values between **November 20, 2024** and **November 29, 2024** (7 trading days). The confidence interval was wide, indicating that the sample did not provide a precise representation of the mean, even though the model could predict the stock trends.
 
 <p float="center">
   <img src="/images/VAR_close_price.png" width="800" /> 
 </p>
 
 ---
-
----
-
 
 <h3 id="Classification-Models">Classification Models</h3>
 
@@ -251,19 +259,20 @@ Similar to Support Vector Regression, data was standardized, features were trans
 
 <h4>Random Forest</h4>
 
-For the `Base model`, I trained my data on `F`'s indicators alone, while for other models, I used both Ford’s and indicators from one company from the list of 6. I applied GridSearch for number of estimators, maximum depth, bootstrap, and criterion. Overall, `Base model` performs well with training accuracy of 0.64. The best model used both `F`'s and `JCI`'s indicators, and only performed slightly better than the `Base model`. 
+For the `Base model`, I trained my data on `F`'s indicators alone, while for other models, I used both Ford’s and indicators from one company from the list of 6. I applied GridSearch for number of estimators, maximum depth, bootstrap, and criterion. `All` model was the model we used all indicators to train the data. Overall, `Base model`'s training accuracy of 0.546, which was slightly better than random guessing and other RF models using individual stock's information, and slightly worse than `All` model. parameters for both `All` and `Base` models were the same, but the `All` model had more features, which would improve the training accuracy.
 
-| Ticker              | Number of estimators   | Maximum Depth | Bootstrap    | Criterion | Training Accuracy |
-|---------------------|------------------------|---------------|-----------   |-----------|-------------------|
-| CAD/USD             | 20                     | 5             | True         | gini      | 0.62              |
-| GM                  | 100                    | 5             | True         | entropy   | 0.64              |
-| JCI                 | 80                     | 5             | True         | gini      | 0.66              |
-| TM                  | 80                     | 5             | True         | gini      | 0.56              |
-| TRY/ USD            | 20                     | 5             | True         | gini      | 0.56              |
-| IXIC                | 500                    | 20            | True         | gini      | 0.64              |
-| Base                | 100                    | 5             | True         | entropy   | 0.64              |
+| Ticker              | Number of estimators   | Maximum Depth | Bootstrap    | Criterion | Training Accuracy | Improvement (%) |
+|---------------------|------------------------|---------------|-----------   |-----------|-------------------|-----------------|
+| CAD/USD             | 100                    | 5             | False        | entropy   | 0.539             | -0.904          |
+| GM                  | 500                    | 5             | True         | gini      | 0.544             | 0               |
+| JCI                 | 500                    | 5             | False        | entropy   | 0.528             | -3.01           |
+| TM                  | 100                    | 5             | True         | gini      | 0.531             | -2.41           |
+| TRY/ USD            | 500                    | 5             | False        | entropy   | 0.538             | -1.20           |
+| IXIC                | 80                     | 5             | False        | entropy   | 0.536             | -1.51           |
+| All                 | 80                     | 5             | False        | entropy   | 0.546             | 0.301           |
+| Base                | 80                     | 5             | False        | entropy   | 0.544             | 0               |
 
-All training models were applied to the backtesting sets and walk forward validation sets. `IXIC` model outperformed other models. On the other hand, `Base model` worked well on backtesting sets, but it performed worse than random guessing.
+All training models were applied to the backtesting sets and walk forward validation sets. On the backtesting set, `RF` using `JCI` performed better than both `All` and `Base` model while the currecy exchange rate of `TRY/USD` performed the worst. However, in the walk-forward validation set, all models performed much better, where RF using `Nasdaq` indicators outperformed other models.
 
 <p float="left">
   <img src="/images/ROC_backtesting.jpg" width="400" />
@@ -326,10 +335,11 @@ Our journey doesn’t stop here. We aim to make more accurate and actionable pre
 
 <h2 id="Code-description">Code Description</h2>
 
-Data uset can be found in this [Data](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Data) folder.
-Notebooks containing various models used for results above can be found in this [Model](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models) folder. The models include:
+Data set can be found in the [Data](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Data) folder.
+Notebooks containing various models used for results above can be found in the [Model](https://github.com/kpnguyen21/equity-vs-commodity/tree/main/Models) folder. The models are:
 - [KNN.ipynb](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/KNN.ipynb)
 - [SVM_reg](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM_reg.ipynb)
 - [SVM_class](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Grishma's_NoteBook/Grishma_SVM%20_class.ipynb)
 - [VAR](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/VAR.ipynb)
 - [RF](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/RF.ipynb)
+- [LSTM](https://github.com/kpnguyen21/equity-vs-commodity/blob/main/Models/GC%20LSTM%20Cleaned.ipynb)
